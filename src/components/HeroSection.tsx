@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import HeroIMG from '../assets/saif2.jpeg';
 import type { Variants } from 'framer-motion';
+
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -37,7 +39,8 @@ const navItems = [
 export const HeroSection: React.FC = () => {
   const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
   const [isHovered, setIsHovered] = useState(false);
-  const [showResumeNotice, setShowResumeNotice] = useState(false);
+  const [showBirthdayNotice, setShowBirthdayNotice] = useState(false);
+  const [daysToBirthday, setDaysToBirthday] = useState<number | null>(null);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -47,42 +50,36 @@ export const HeroSection: React.FC = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+   // Birthday countdown logic
+   useEffect(() => {
+    const BIRTHDAY_MONTH = 10; // October
+    const BIRTHDAY_DAY = 17;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let nextBirthday = new Date(today.getFullYear(), BIRTHDAY_MONTH - 1, BIRTHDAY_DAY);
+    if (nextBirthday < today) {
+      nextBirthday = new Date(today.getFullYear() + 1, BIRTHDAY_MONTH - 1, BIRTHDAY_DAY);
+    }
+
+    const diffDays = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    setDaysToBirthday(diffDays);
+
+    if (diffDays <= 30) {
+      const showTimer = setTimeout(() => setShowBirthdayNotice(true), 1200);
+      const hideTimer = setTimeout(() => setShowBirthdayNotice(false), 1200 + 7000);
+      return () => {
+        clearTimeout(showTimer);
+        clearTimeout(hideTimer);
+      };
+    }
+  }, []);
+
 
 
   return (
     <section className="relative w-screen h-screen overflow-hidden bg-black text-[#E8DFD8] font-sans selection:bg-[#cbb59d] selection:text-black cursor-none">
-      {/* ================= RESUME COMING SOON TOAST ================= */}
-      <AnimatePresence>
-        {showResumeNotice && (
-          <motion.div
-            initial={{ opacity: 0, y: -30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] pointer-events-auto"
-          >
-            <div className="flex items-center space-x-3.5 px-6 py-3.5 rounded-sm border border-[#D4AF37] bg-[#120F0C]/95 backdrop-blur-md shadow-[0_10px_35px_rgba(212,175,55,0.25)]">
-              <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-ping" />
-              <div className="flex flex-col">
-                <span 
-                  className="text-[11px] font-mono tracking-[0.25em] uppercase text-[#F7E7C4] font-semibold"
-                >
-                  RESUME // COMING SOON
-                </span>
-                <span className="text-[10px] text-[#A8988B] font-light" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                  Updated CV is currently in preparation.
-                </span>
-              </div>
-              <button
-                onClick={() => setShowResumeNotice(false)}
-                className="ml-4 text-[#C4B5A5] hover:text-white text-xs transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ================= 1. MINIMAL CUSTOM CURSOR ================= */}
       {cursorPos.x >= 0 && (
@@ -98,18 +95,16 @@ export const HeroSection: React.FC = () => {
           transition={{ type: 'spring', damping: 30, stiffness: 350, mass: 0.5 }}
         />
       )}
+      
 
       {/* ================= 2. FIXED VIDEO LAYER ================= */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-black flex items-center justify-end">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="h-screen w-auto max-w-none object-contain origin-right scale-95 md:scale-[0.98] lg:scale-100"
-        >
-          <source src="/videos/hero.mp4" type="video/mp4" />
-        </video>
+          {/* ================= 2. FIXED IMAGE LAYER ================= */}
+          <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-black flex items-center justify-center md:justify-end">
+        <img
+          src={HeroIMG}
+          alt="Hero"
+          className="h-full w-full object-cover object-center md:h-screen md:w-auto md:max-w-none md:object-contain md:origin-right md:scale-95 lg:scale-100"
+        />
 
         {/* Seamless Soft Left Edge Blend */}
         <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-black via-black/85 to-transparent pointer-events-none" />
@@ -193,6 +188,55 @@ export const HeroSection: React.FC = () => {
             </a>
           </div>
         </header>
+              {/* ================= BIRTHDAY COUNTDOWN TOAST ================= */}
+      {/* ================= BIRTHDAY COUNTDOWN TOAST ================= */}
+      <AnimatePresence>
+        {showBirthdayNotice && daysToBirthday !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] pointer-events-auto w-[92%] sm:w-auto"
+          >
+            <div className="flex items-center space-x-3.5 px-5 sm:px-6 py-3.5 rounded-sm border border-[#D4AF37] bg-[#120F0C]/95 backdrop-blur-md shadow-[0_10px_35px_rgba(212,175,55,0.25)] w-full sm:w-auto">
+              <span className="text-lg shrink-0">🎂</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[11px] font-mono tracking-[0.25em] uppercase text-[#F7E7C4] font-semibold">
+                  {daysToBirthday === 0
+                    ? "IT'S MY BIRTHDAY TODAY!"
+                    : `${daysToBirthday} DAY${daysToBirthday === 1 ? '' : 'S'} TO MY BIRTHDAY`}
+                </span>
+                <span className="text-[10px] text-[#A8988B] font-light" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+                  {daysToBirthday === 0 ? 'Celebrating today 🎉' : 'October 17 — mark your calendar!'}
+                </span>
+              </div>
+
+              {/* Send Wish Button */}
+              <a
+                href={`https://wa.me/916204180519?text=${encodeURIComponent(
+                  daysToBirthday === 0
+                    ? 'Happy Birthday! 🎉🎂'
+                    : 'Just saw your birthday is coming up — wishing you an early Happy Birthday! 🎂'
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 shrink-0 px-3 py-1.5 text-[10px] font-medium tracking-[0.15em] uppercase border border-[#D4AF37]/60 bg-[#D4AF37]/10 hover:bg-[#D4AF37] text-[#F7E7C4] hover:text-black transition-all duration-300 whitespace-nowrap"
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                Wish Me
+              </a>
+
+              <button
+                onClick={() => setShowBirthdayNotice(false)}
+                className="ml-1 sm:ml-2 text-[#C4B5A5] hover:text-white text-xs transition-colors shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
         {/* Main Hero Row */}
         <div className="relative flex flex-col md:flex-row items-center justify-between w-full pt-4 pb-2 my-auto">
@@ -256,20 +300,7 @@ export const HeroSection: React.FC = () => {
               className="flex flex-row items-center gap-4 sm:gap-6"
               style={{ fontFamily: "'Montserrat', sans-serif" }}
             >
-              {/* Explore My Work CTA */}
-              <motion.a
-                href="#work"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                whileHover={{ scale: 1.02 }}
-                className="relative inline-flex items-center space-x-3 px-6 sm:px-7 py-3.5 border border-[#8C6D4F] bg-[#120F0C]/80 hover:border-[#D4AF37] text-[#EAD8C7] hover:text-[#FFF5EB] text-[11px] font-medium tracking-[0.24em] uppercase transition-all duration-300 shadow-[0_0_25px_rgba(212,175,55,0.18)]"
-              >
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#E8D7C5]/40 to-transparent pointer-events-none" />
-                <span>SEE WHAT I MAKE</span>
-                <span className="transform transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-xs">
-                  ↗
-                </span>
-              </motion.a>
+              
 
               {/* Say Hi Button */}
               <motion.a
